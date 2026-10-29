@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyber-Glass Dashboard - Perfil Avanzado & Compatibilidad CSS</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       TABLA DE COMPATIBILIDAD Y PRUEBAS EN NAVEGADORES (Examen - Pregunta 4)
+       ==========================================================================
+       | Navegador Pruebas     | ¿Qué se ve igual?               | ¿Qué cambia / Fallback?              |
+       |-----------------------|----------------------------------|--------------------------------------|
+       | Chrome 118+ / Edge    | Layout Grid 3D tilt, pestañas,   | Renderiza el desenfoque óptico       |
+       | (Soporte completo)    | temas de color dinámicos, SVGs   | multicapa completo (backdrop-filter) |
+       |                       | animados y microinteracciones.   | y reflejos satinados de luz.         |
+       |                       |                                  |                                      |
+       | Firefox 88- / Safari  | Toda la jerarquía de UI, badges, | Cae elegantemente a un fondo opaco   |
+       | (Legacy o modo simu-  | datos, funcionalidad de pestañas | semitransparente oscuro y bordes     |
+       | lado sin backdrop-flt)| y botones interactivos.          | de alta visibilidad sin blur.        |
+       ==========================================================================
+       Fuentes Consultadas: 
+       - MDN Web Docs: @supports, backdrop-filter, prefers-reduced-motion, CSS Custom Properties
+       - CanIUse.com: Compatibility tables for 'CSS backdrop-filter' & 'CSS Variables'
+       ========================================================================== */
+
+    /* --------------------------------------------------------------------------
+       1. VARIABLES CSS DINÁMICAS (CUSTOM PROPERTIES)
+       -------------------------------------------------------------------------- */
+    :root {
+      /* Tema por defecto: Neon Violet/Cyan */
+      --primary-accent: #8b5cf6;
+      --primary-glow: rgba(139, 92, 246, 0.4);
+      --secondary-accent: #06b6d4;
+      --tertiary-accent: #f43f5e;
+      
+      --bg-dark: #070913;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      /* Valores de Reserva (Fallbacks) */
+      --fallback-glass-bg: rgba(15, 23, 42, 0.96);
+      --fallback-border: rgba(255, 255, 255, 0.15);
+      
+      /* Valores Modernos con Transparencia para Glassmorphism */
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-bg-subtle: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-highlight: rgba(255, 255, 255, 0.25);
+    }
+
+    /* Temas configurables */
+    [data-theme="cyan"] {
+      --primary-accent: #06b6d4;
+      --primary-glow: rgba(6, 182, 212, 0.4);
+      --secondary-accent: #3b82f6;
+    }
+    [data-theme="emerald"] {
+      --primary-accent: #10b981;
+      --primary-glow: rgba(16, 185, 129, 0.4);
+      --secondary-accent: #06b6d4;
+    }
+    [data-theme="crimson"] {
+      --primary-accent: #f43f5e;
+      --primary-glow: rgba(244, 63, 94, 0.4);
+      --secondary-accent: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      background-color: #070913; /* Fallback directo */
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.15) 0%, transparent 40%);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      overflow-x: hidden;
+      perspective: 1200px;
+    }
+
+    .font-orbitron {
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    /* --------------------------------------------------------------------------
+       2. ELEMENTOS DE FONDO Y ORBES
+       -------------------------------------------------------------------------- */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 10s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 380px;
+      height: 380px;
+      background: var(--primary-accent);
+      top: 10%;
+      left: 10%;
+      opacity: 0.35;
+      transition: background 0.5s ease;
+    }
+
+    .orb-2 {
+      width: 320px;
+      height: 320px;
+      background: var(--secondary-accent);
+      bottom: 10%;
+      right: 10%;
+      opacity: 0.3;
+      animation-delay: -5s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, -50px) scale(1.15); }
+    }
+
+    /* --------------------------------------------------------------------------
+       3. PANEL DASHBOARD GLASSMORPHIC - ESTRUCTURA Y FALLBACKS
+       -------------------------------------------------------------------------- */
+    .dashboard-container {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 900px;
+      border-radius: 28px;
+      padding: 2rem;
+      
+      /* PREFIJOS Y FALLBACKS EXIGIDOS (P2) */
+      background-color: #0f172a;
+      background-color: var(--fallback-glass-bg);
+      
+      border: 1px solid #334155;
+      border: 1px solid var(--fallback-border);
+      
+      -webkit-box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+    }
+
+    /* REGLA @supports PARA GLASSMORPHISM (P1) */
+    @supports ((-webkit-backdrop-filter: blur(20px)) or (backdrop-filter: blur(20px))) {
+      .dashboard-container:not(.simulate-legacy) {
+        background-color: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+      }
+
+      .glass-card-subtle:not(.simulate-legacy) {
+        background-color: var(--glass-bg-subtle);
+        border: 1px solid var(--glass-border);
+        
+        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: blur(12px);
+      }
+    }
+
+    /* Clase de simulación manual para navegadores viejos */
+    .dashboard-container.simulate-legacy {
+      background-color: var(--fallback-glass-bg) !important;
+      border: 1px solid var(--fallback-border) !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    .dashboard-container.simulate-legacy .glass-card-subtle {
+      background-color: rgba(30, 41, 59, 0.8) !important;
+      border: 1px solid rgba(255,255,255,0.1) !important;
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+    }
+
+    /* --------------------------------------------------------------------------
+       4. COMPONENTES INTERNOS & LAYOUT GRID
+       -------------------------------------------------------------------------- */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 820px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Barra Superior del Dashboard */
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-b: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--primary-accent);
+      background: var(--primary-glow);
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      border: 1px solid var(--primary-accent);
+    }
+
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .theme-picker {
+      display: flex;
+      gap: 0.4rem;
+      background: rgba(0,0,0,0.3);
+      padding: 0.25rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .theme-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .theme-dot:hover {
+      transform: scale(1.2);
+    }
+
+    .theme-dot.active {
+      border-color: #ffffff;
+    }
+
+    .dot-violet { background: #8b5cf6; }
+    .dot-cyan { background: #06b6d4; }
+    .dot-emerald { background: #10b981; }
+    .dot-crimson { background: #f43f5e; }
+
+    .toggle-legacy-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.4rem 0.75rem;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-legacy-btn:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.15);
+    }
+
+    /* Columna Izquierda: Perfil Sidebar */
+    .profile-sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background-color: rgba(15, 23, 42, 0.6);
+      border-radius: 20px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .avatar-container {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      margin-bottom: 1.25rem;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--primary-accent), var(--secondary-accent), var(--primary-accent));
+      animation: rotateRing 6s linear infinite;
+    }
+
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .avatar-img {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #070913;
+    }
+
+    .user-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .user-role {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-accent);
+      margin-top: 0.2rem;
+      margin-bottom: 1rem;
+    }
+
+    .user-location {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .status-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.3rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      margin-bottom: 1.5rem;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #34d399;
+      box-shadow: 0 0 8px #34d399;
+    }
+
+    /* Botones de Redes Sociales */
+    .social-links {
+      display: flex;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .social-btn {
+      flex: 1;
+      padding: 0.6rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .social-btn:hover {
+      color: var(--text-main);
+      background: var(--primary-glow);
+      border-color: var(--primary-accent);
+      transform: translateY(-2px);
+    }
+
+    /* Columna Derecha: Pestañas y Métricas */
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 0.75rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255,255,255,0.05);
+    }
+
+    .tab-btn.active {
+      color: var(--text-main);
+      background: var(--primary-accent);
+      box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tarjetas de Métricas SVG */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-card {
+      border-radius: 16px;
+      padding: 1.25rem;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(15, 23, 42, 0.4);
+    }
+
+    .metric-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    /* Gráficos SVG interactivos */
+    .sparkline-svg {
+      width: 100%;
+      height: 40px;
+      margin-top: 0.5rem;
+    }
+
+    .sparkline-path {
+      fill: none;
+      stroke: var(--primary-accent);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: drawLine 2s ease forwards 0.2s;
+    }
+
+    @keyframes drawLine {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Habilidades y Proyectos Tags */
+    .skills-flex {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .skill-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-main);
+    }
+
+    /* Botón de Acción Principal */
+    .cta-btn {
+      width: 100%;
+      padding: 1rem;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      box-shadow: 0 8px 25px var(--primary-glow);
+      transition: all 0.2s ease;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px var(--primary-glow);
+    }
+
+    .cta-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* --------------------------------------------------------------------------
+       5. ACCESIBILIDAD Y MOVIMIENTO REDUCIDO (P3 EXIGIDO)
+       -------------------------------------------------------------------------- */
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        -webkit-animation: none !important;
+        animation: none !important;
+        -webkit-transition: none !important;
+        transition: none !important;
+      }
+
+      .dashboard-container,
+      .orb,
+      .avatar-ring,
+      .social-btn,
+      .cta-btn {
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body data-theme="violet">
+
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <!-- CONTENEDOR PRINCIPAL DASHBOARD 3D TILT -->
+  <main class="dashboard-container" id="dashboardCard">
+    
+    <!-- BARRA SUPERIOR DE CONTROL -->
+    <header class="dashboard-header">
+      <div class="brand-tag">
+        <i class="fa-solid fa-microchip"></i> Cyber-Glass v2.4
+      </div>
+
+      <div class="controls-bar">
+        <!-- Selector de temas dinámicos -->
+        <div class="theme-picker" title="Cambiar Tema de Color">
+          <div class="theme-dot dot-violet active" onclick="setTheme('violet')"></div>
+          <div class="theme-dot dot-cyan" onclick="setTheme('cyan')"></div>
+          <div class="theme-dot dot-emerald" onclick="setTheme('emerald')"></div>
+          <div class="theme-dot dot-crimson" onclick="setTheme('crimson')"></div>
+        </div>
+
+        <!-- Botón para simular fallo de @supports (Navegador antiguo) -->
+        <button class="toggle-legacy-btn" id="legacyToggleBtn" onclick="toggleLegacyMode()" title="Simular Navegador sin Backdrop-Filter">
+          <i class="fa-solid fa-eye-slash"></i> Simular No-Glass
+        </button>
+      </div>
+    </header>
+
+    <!-- GRID PRINCIPAL -->
+    <div class="dashboard-grid">
+      
+      <!-- COLUMNA IZQUIERDA: PERFIL SIDEBAR -->
+      <aside class="profile-sidebar glass-card-subtle">
+        <div class="avatar-container">
+          <div class="avatar-ring"></div>
+          <img 
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQPofmSlkQkBE_1LFre0ytVF2E8pcTDdeTcbuI5u2N4Fw&s=10" 
+            alt="Camila Sotomayor" 
+            class="avatar-img"
+            onerror="this.src='https://placehold.co/150x150/1e293b/f8fafc?text=User'"
+          >
+        </div>
+
+        <h2 class="user-name">Camila Sotomayor</h2>
+        <span class="user-role font-orbitron">AI & FRONTEND ARCHITECT</span>
+        
+        <div class="user-location">
+          <i class="fa-solid fa-location-dot text-rose-500"></i> Arequipa, Perú
+        </div>
+
+        <div class="status-badge-pill">
+          <span class="status-dot"></span> Disponible para proyectos
+        </div>
+
+        <div class="social-links">
+          <button class="social-btn" aria-label="Github"><i class="fa-brands fa-github"></i></button>
+          <button class="social-btn" aria-label="Linkedin"><i class="fa-brands fa-linkedin-in"></i></button>
+          <button class="social-btn" aria-label="Twitter"><i class="fa-brands fa-x-twitter"></i></button>
+        </div>
+      </aside>
+
+      <!-- COLUMNA DERECHA: DASHBOARD CONTENT -->
+      <section>
+        <!-- NAVEGACIÓN DE PESTAÑAS -->
+        <nav class="nav-tabs">
+          <button class="tab-btn active" onclick="switchTab('metrics', this)">
+            <i class="fa-solid fa-chart-pie"></i> Métricas
+          </button>
+          <button class="tab-btn" onclick="switchTab('skills', this)">
+            <i class="fa-solid fa-code"></i> Skills
+          </button>
+          <button class="tab-btn" onclick="switchTab('info', this)">
+            <i class="fa-solid fa-user-astronaut"></i> Bio
+          </button>
+        </nav>
+
+        <!-- PESTAÑA 1: MÉTRICAS Y GRÁFICOS SVG -->
+        <div id="tab-metrics" class="tab-content active">
+          <div class="metrics-grid">
+            <div class="metric-card glass-card-subtle">
+              <span class="metric-title">Proyectos Completados</span>
+              <span class="metric-val font-orbitron">148</span>
+              <svg class="sparkline-svg" viewBox="0 0 100 30">
+                <path class="sparkline-path" d="M0 25 L20 15 L40 20 L60 8 L80 18 L100 5" />
+              </svg>
+            </div>
+
+            <div class="metric-card glass-card-subtle">
+              <span class="metric-title">Rating de Código</span>
+              <span class="metric-val font-orbitron">99.8%</span>
+              <svg class="sparkline-svg" viewBox="0 0 100 30">
+                <path class="sparkline-path" d="M0 20 L25 10 L50 15 L75 5 L100 12" stroke="var(--secondary-accent)" />
+              </svg>
+            </div>
+          </div>
+
+          <button class="cta-btn font-orbitron" onclick="triggerEffect()">
+            <i class="fa-solid fa-paper-plane"></i> INICIAR COLABORACIÓN
+          </button>
+        </div>
+
+        <!-- PESTAÑA 2: SKILLS Y TECNOLOGÍAS -->
+        <div id="tab-skills" class="tab-content">
+          <h3 class="text-sm font-bold text-slate-300 mb-2">Stack Tecnológico</h3>
+          <div class="skills-flex">
+            <span class="skill-tag"><i class="fa-brands fa-react text-cyan-400"></i> React 19</span>
+            <span class="skill-tag"><i class="fa-brands fa-js text-yellow-400"></i> ES2026 / JS</span>
+            <span class="skill-tag"><i class="fa-brands fa-css3-alt text-blue-400"></i> CSS Glassmorphism</span>
+            <span class="skill-tag"><i class="fa-solid fa-wind text-teal-400"></i> Tailwind CSS</span>
+            <span class="skill-tag"><i class="fa-solid fa-brain text-purple-400"></i> AI Integration</span>
+            <span class="skill-tag"><i class="fa-brands fa-node-js text-green-400"></i> Node.js</span>
+          </div>
+        </div>
+
+        <!-- PESTAÑA 3: INFORMACIÓN / BIO -->
+        <div id="tab-info" class="tab-content">
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Arquitecta de interfaces enfocada en combinar principios de diseño Glassmorphic de alto impacto estético con código CSS responsivo, compatible y accesible bajo estándares W3C.
+          </p>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <script>
+    // --- 1. TILT EFFECT 3D EN MOUSE MOVE ---
+    const card = document.getElementById('dashboardCard');
+
+    document.addEventListener('mousemove', (e) => {
+      // Desactivar si el usuario prefiere movimiento reducido
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
+
+      const rotX = ((clientY - innerHeight / 2) / (innerHeight / 2)) * -8;
+      const rotY = ((clientX - innerWidth / 2) / (innerWidth / 2)) * 8;
+
+      card.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    });
+
+    // Reset inclinación al salir
+    document.addEventListener('mouseleave', () => {
+      card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    });
+
+    // --- 2. SELECTOR DE TEMAS EN TIEMPO REAL ---
+    function setTheme(themeName) {
+      document.body.setAttribute('data-theme', themeName);
+      document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // --- 3. CAMBIO DE PESTAÑAS ---
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      btn.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+
+    // --- 4. SIMULADOR MANUAL DE NAVEGADOR ANTIGUO (FALLBACK DEMO) ---
+    function toggleLegacyMode() {
+      const isLegacy = card.classList.toggle('simulate-legacy');
+      const btn = document.getElementById('legacyToggleBtn');
+      
+      if (isLegacy) {
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i> Activar Glassmorphism';
+        btn.style.color = '#f43f5e';
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i> Simular No-Glass';
+        btn.style.color = 'var(--text-muted)';
+      }
+    }
+
+    // --- 5. MICROINTERACCIÓN AL HACER CLIC EN CTA ---
+    function triggerEffect() {
+      card.style.transform = 'scale(0.98)';
+      setTimeout(() => {
+        card.style.transform = 'none';
+        alert('¡Solicitud enviada con éxito a Camila Sotomayor!');
+      }, 150);
+    }
+  </script>
+</body>
+</html>
