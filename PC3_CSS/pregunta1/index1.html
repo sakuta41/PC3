@@ -1,0 +1,1043 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Store | Catálogo</title>
+
+<style>
+:root {
+  --primary: #635bff;
+  --dark: #24243b;
+  --muted: #85889b;
+  --bg: #f7f8fc;
+  --border: #e9eaf2;
+  --green: #159b68;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--dark);
+}
+
+button, input, select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.container {
+  width: min(1200px, 92%);
+  margin: auto;
+}
+
+/* ENCABEZADO */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.logo span {
+  color: var(--primary);
+}
+
+.cart-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 15px;
+  color: white;
+  background: var(--primary);
+  font-weight: bold;
+}
+
+.cart-count {
+  margin-left: 5px;
+  padding: 3px 7px;
+  border-radius: 20px;
+  color: var(--primary);
+  background: white;
+}
+
+/* PORTADA */
+.hero {
+  margin: 30px auto 40px;
+  padding: 55px 35px;
+  border-radius: 24px;
+  color: white;
+  background: linear-gradient(120deg, #252343, #635bff);
+}
+
+.hero small {
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.hero h1 {
+  max-width: 650px;
+  margin: 15px 0;
+  font-size: clamp(32px, 5vw, 55px);
+  line-height: 1.12;
+}
+
+.hero p {
+  color: #e3e1ff;
+}
+
+.hero a {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: var(--primary);
+  background: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* FILTROS */
+.catalog {
+  padding-bottom: 60px;
+  scroll-margin-top: 90px;
+}
+
+.catalog-heading {
+  margin-bottom: 20px;
+}
+
+.catalog-heading h2 {
+  font-size: 27px;
+}
+
+.catalog-heading p {
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.controls input,
+.controls select {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: white;
+}
+
+.controls input {
+  flex: 1;
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 25px;
+}
+
+.category-btn {
+  padding: 9px 15px;
+  border: 1px solid var(--border);
+  border-radius: 25px;
+  background: white;
+}
+
+.category-btn.active {
+  color: white;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* TARJETAS */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 5px 20px #24243b08;
+  animation: appear .45s ease both;
+  transition: transform .3s, box-shadow .3s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px #24243b18;
+}
+
+.product-image {
+  position: relative;
+  height: 220px;
+  margin: 10px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #eeecff;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform .5s;
+}
+
+.product-card:hover .product-image img {
+  transform: scale(1.06);
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  color: #4f46e5;
+  background: #eeecff;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.favorite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+  color: #777;
+  font-size: 23px;
+  transition: transform .2s, color .2s;
+}
+
+.favorite.active {
+  color: #f04472;
+  animation: pop .3s ease;
+}
+
+.product-info {
+  padding: 8px 15px 16px;
+}
+
+.category-label {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.3px;
+}
+
+.product-info h3 {
+  margin: 7px 0;
+  font-size: 16px;
+}
+
+.rating {
+  margin: 8px 0 12px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stars {
+  color: #ffb547;
+  letter-spacing: 1px;
+}
+
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.price strong {
+  font-size: 19px;
+}
+
+.price del {
+  color: #999;
+  font-size: 12px;
+}
+
+.add-cart {
+  width: 100%;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background: var(--primary);
+  font-size: 12px;
+  font-weight: bold;
+  transition: background .2s, transform .15s;
+}
+
+.add-cart:hover {
+  background: #4f46e5;
+}
+
+.add-cart:active {
+  transform: scale(.96);
+}
+
+.add-cart.added {
+  background: var(--green);
+}
+
+.empty {
+  grid-column: 1 / -1;
+  padding: 40px;
+  border-radius: 15px;
+  background: white;
+  text-align: center;
+}
+
+/* CARRITO */
+.cart-panel {
+  position: fixed;
+  z-index: 30;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(400px, 100%);
+  height: 100%;
+  padding: 22px;
+  background: white;
+  box-shadow: -10px 0 40px #0002;
+  transform: translateX(110%);
+  transition: transform .3s;
+}
+
+.cart-panel.open {
+  transform: translateX(0);
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  background: #0007;
+  opacity: 0;
+  visibility: hidden;
+  transition: .3s;
+}
+
+.overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.close-cart {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  font-size: 20px;
+}
+
+.cart-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 65px 1fr;
+  gap: 12px;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cart-item img {
+  width: 65px;
+  height: 65px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.cart-item p {
+  margin-top: 5px;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.cart-item button {
+  margin-top: 7px;
+  margin-right: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: white;
+}
+
+.cart-footer {
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.cart-footer p {
+  margin-bottom: 15px;
+  font-size: 19px;
+  font-weight: bold;
+}
+
+.checkout {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  color: white;
+  background: var(--primary);
+  font-weight: bold;
+}
+
+/* MENSAJE */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  z-index: 50;
+  max-width: 90%;
+  padding: 13px 18px;
+  border-radius: 10px;
+  color: white;
+  background: var(--dark);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 15px);
+  transition: .25s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+footer {
+  padding: 25px;
+  color: var(--muted);
+  background: white;
+  text-align: center;
+  font-size: 12px;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop {
+  50% { transform: scale(1.3); }
+}
+
+@media (max-width: 1000px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .product-image {
+    height: 190px;
+  }
+
+  .hero {
+    padding: 38px 22px;
+  }
+
+  .controls {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 430px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-image {
+    height: 270px;
+  }
+
+  .product-info h3 {
+    font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="container navbar">
+    <div class="logo">nova<span>store</span></div>
+    <button class="cart-button" id="openCart">
+      🛒 Carrito <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <small>DESCUBRE LO NUEVO</small>
+    <h1>Productos que mejoran tu día a día.</h1>
+    <p>Diseño, tecnología y calidad en un solo lugar.</p>
+    <a href="#catalogo">Explorar productos ↓</a>
+  </section>
+
+  <section class="catalog" id="catalogo">
+    <div class="catalog-heading">
+      <h2>Productos destacados</h2>
+      <p id="resultCount">Nuestros productos para ti.</p>
+    </div>
+
+    <div class="controls">
+      <input id="search" type="search"
+        placeholder="Buscar productos..."
+        aria-label="Buscar productos">
+
+      <select id="sort" aria-label="Ordenar productos">
+        <option value="default">Orden recomendado</option>
+        <option value="asc">Precio: menor a mayor</option>
+        <option value="desc">Precio: mayor a menor</option>
+        <option value="rating">Mejor valorados</option>
+      </select>
+    </div>
+
+    <div class="categories" id="categories">
+      <button class="category-btn active" data-cat="Todos">Todos</button>
+      <button class="category-btn" data-cat="Audio">Audio</button>
+      <button class="category-btn" data-cat="Accesorios">Accesorios</button>
+      <button class="category-btn" data-cat="Calzado">Calzado</button>
+      <button class="category-btn" data-cat="Fotografía">Fotografía</button>
+    </div>
+
+    <div class="product-grid" id="products"></div>
+  </section>
+</main>
+
+<footer>
+  © 2026 Nova Store · Catálogo de demostración.
+</footer>
+
+<div class="overlay" id="overlay"></div>
+
+<aside class="cart-panel" id="cartPanel"
+  role="dialog" aria-modal="true" aria-label="Carrito de compras">
+  <div class="cart-header">
+    <h2>Tu carrito 🛒</h2>
+    <button class="close-cart" id="closeCart"
+      aria-label="Cerrar carrito">×</button>
+  </div>
+
+  <div class="cart-items" id="cartItems"></div>
+
+  <div class="cart-footer">
+    <p>Subtotal: <span id="subtotal">S/ 0.00</span></p>
+    <button class="checkout" id="checkout">Continuar compra</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/*
+  IMÁGENES LOCALES
+  Guarda las fotografías dentro de la carpeta img.
+  Ejemplo: img/auriculares.jpg
+
+  Si falta un archivo, se crea una ilustración SVG
+  integrada en el HTML. No necesita Internet.
+*/
+
+const productsData = [
+  {
+    id: 1,
+    name: "Auriculares Studio Pro",
+    category: "Audio",
+    price: 249.90,
+    oldPrice: 329.90,
+    rating: 4.9,
+    badge: "Más vendido",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfAs4z_P5wVVCWjCqBowTsfUWhpCGX9iFrdvtaDQvNHg&s=10",
+    color: "#dce7f7",
+    symbol: "♫"
+  },
+  {
+    id: 2,
+    name: "Minimal Watch",
+    category: "Accesorios",
+    price: 189.90,
+    oldPrice: 229.90,
+    rating: 4.7,
+    badge: "Nuevo",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS4bInOrFJC4NLPfyrDeAmqEHCAVhJfSA9_QNT935xTNw&s=10",
+    color: "#e4e0d8",
+    symbol: "◷"
+  },
+  {
+    id: 3,
+    name: "Urban Runner X",
+    category: "Calzado",
+    price: 279.90,
+    oldPrice: 349.90,
+    rating: 4.9,
+    badge: "Oferta",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT6Ic5D4y_wfDfD1xW6oDVryzvkNZxNl8_AykpYF7Osvw&s",
+    color: "#f8dede",
+    symbol: "➤"
+  },
+  {
+    id: 4,
+    name: "Retro Camera Mini",
+    category: "Fotografía",
+    price: 399.90,
+    oldPrice: 459.90,
+    rating: 4.6,
+    badge: "Destacado",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTRsfltmPBvfE64okia-aTRE2TvxqkOPA8XDjOIlEh9Hg&s=10",
+    color: "#dcdcf0",
+    symbol: "◎"
+  },
+  {
+    id: 5,
+    name: "Headphones Air",
+    category: "Audio",
+    price: 159.90,
+    oldPrice: null,
+    rating: 4.5,
+    badge: "",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWbRfGOiCyEosPo5VDWsGKcqBifU8GLbjQFqQglQGXpw&s=10",
+    color: "#dcefe8",
+    symbol: "♫"
+  },
+  {
+    id: 6,
+    name: "Classic Time",
+    category: "Accesorios",
+    price: 219.90,
+    oldPrice: 259.90,
+    rating: 4.8,
+    badge: "Popular",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6DFciDgTdafIwiFnRLNXpwHMXQfA3CDx6HYjCcJg3KA&s=10",
+    color: "#f3e4cd",
+    symbol: "◷"
+  },
+  {
+    id: 7,
+    name: "Street Sneakers",
+    category: "Calzado",
+    price: 199.90,
+    oldPrice: 249.90,
+    rating: 4.4,
+    badge: "Oferta",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmYwBrWl3tZknUXIg7JEngZsUlOvJ_YijvcN_noHEBBw&s=10",
+    color: "#e2e2e2",
+    symbol: "➤"
+  },
+  {
+    id: 8,
+    name: "Photo Creator",
+    category: "Fotografía",
+    price: 459.90,
+    oldPrice: null,
+    rating: 4.9,
+    badge: "Premium",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFVIbYp6rGHzIDduk5WRb66a7Vs-If4vXKEbe6ZgUdoA&s=10",
+    color: "#dce4f3",
+    symbol: "◎"
+  }
+];
+
+const state = {
+  category: "Todos",
+  search: "",
+  sort: "default",
+  favorites: new Set(),
+  cart: new Map()
+};
+
+const $ = id => document.getElementById(id);
+
+function money(value) {
+  return "S/ " + value.toFixed(2);
+}
+
+/*
+  Crea una imagen SVG de respaldo.
+  Se genera dentro del propio HTML y se visualiza offline.
+*/
+function createFallback(product) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg"
+      width="600" height="450" viewBox="0 0 600 450">
+      <rect width="600" height="450" fill="${product.color}"/>
+      <circle cx="300" cy="195" r="115"
+        fill="#ffffff" opacity=".55"/>
+      <text x="300" y="230" text-anchor="middle"
+        font-family="Arial" font-size="115"
+        fill="#635bff">${product.symbol}</text>
+      <text x="300" y="365" text-anchor="middle"
+        font-family="Arial" font-size="24"
+        font-weight="bold" fill="#24243b">
+        Nova Store
+      </text>
+      <text x="300" y="395" text-anchor="middle"
+        font-family="Arial" font-size="17" fill="#555">
+        ${product.category}
+      </text>
+    </svg>`;
+
+  return "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(svg);
+}
+
+/*
+  Primero intenta cargar el archivo local.
+  Si no existe, muestra el SVG generado.
+*/
+function handleImageError(img, productId) {
+  const product = productsData.find(p => p.id === productId);
+  if (!product || img.dataset.fallbackUsed) return;
+
+  img.dataset.fallbackUsed = "true";
+  img.onerror = null;
+  img.src = createFallback(product);
+}
+
+function showToast(message) {
+  $("toast").textContent = message;
+  $("toast").classList.add("show");
+
+  clearTimeout(showToast.timer);
+
+  showToast.timer = setTimeout(() => {
+    $("toast").classList.remove("show");
+  }, 2000);
+}
+
+function getVisibleProducts() {
+  let result = productsData.filter(product => {
+    const matchesCategory =
+      state.category === "Todos" ||
+      product.category === state.category;
+
+    const term = state.search.toLowerCase();
+
+    const matchesSearch =
+      product.name.toLowerCase().includes(term) ||
+      product.category.toLowerCase().includes(term);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  if (state.sort === "asc") {
+    result.sort((a, b) => a.price - b.price);
+  }
+
+  if (state.sort === "desc") {
+    result.sort((a, b) => b.price - a.price);
+  }
+
+  if (state.sort === "rating") {
+    result.sort((a, b) => b.rating - a.rating);
+  }
+
+  return result;
+}
+
+function renderProducts() {
+  const products = getVisibleProducts();
+
+  $("resultCount").textContent =
+    `${products.length} producto(s) encontrado(s)`;
+
+  if (products.length === 0) {
+    $("products").innerHTML = `
+      <div class="empty">
+        <h3>No se encontraron productos</h3>
+        <p>Prueba con otra búsqueda.</p>
+      </div>`;
+    return;
+  }
+
+  $("products").innerHTML = products.map((product, index) => {
+    const favorite = state.favorites.has(product.id);
+
+    return `
+      <article class="product-card"
+        style="animation-delay:${index * 50}ms">
+
+        <div class="product-image">
+          <img
+            src="${product.image}"
+            alt="${product.name}"
+            loading="${index < 4 ? "eager" : "lazy"}"
+            onerror="handleImageError(this, ${product.id})">
+
+          ${product.badge
+            ? `<span class="badge">${product.badge}</span>`
+            : ""}
+
+          <button class="favorite ${favorite ? "active" : ""}"
+            data-favorite="${product.id}"
+            aria-label="Cambiar favorito de ${product.name}"
+            aria-pressed="${favorite}">
+            ${favorite ? "♥" : "♡"}
+          </button>
+        </div>
+
+        <div class="product-info">
+          <span class="category-label">
+            ${product.category.toUpperCase()}
+          </span>
+
+          <h3>${product.name}</h3>
+
+          <div class="rating">
+            <span class="stars">★★★★★</span>
+            ${product.rating} / 5
+          </div>
+
+          <div class="price">
+            <strong>${money(product.price)}</strong>
+            ${product.oldPrice
+              ? `<del>${money(product.oldPrice)}</del>`
+              : ""}
+          </div>
+
+          <button class="add-cart" data-add="${product.id}">
+            🛒 Añadir al carrito
+          </button>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+/* FILTROS */
+$("categories").addEventListener("click", event => {
+  const button = event.target.closest("[data-cat]");
+  if (!button) return;
+
+  state.category = button.dataset.cat;
+
+  document.querySelectorAll(".category-btn").forEach(btn => {
+    btn.classList.toggle("active", btn === button);
+  });
+
+  renderProducts();
+});
+
+$("search").addEventListener("input", event => {
+  state.search = event.target.value.trim();
+  renderProducts();
+});
+
+$("sort").addEventListener("change", event => {
+  state.sort = event.target.value;
+  renderProducts();
+});
+
+/* FAVORITOS */
+$("products").addEventListener("click", event => {
+  const button = event.target.closest("[data-favorite]");
+  if (!button) return;
+
+  const id = Number(button.dataset.favorite);
+
+  if (state.favorites.has(id)) {
+    state.favorites.delete(id);
+    showToast("Eliminado de favoritos");
+  } else {
+    state.favorites.add(id);
+    showToast("♥ Añadido a favoritos");
+  }
+
+  renderProducts();
+});
+
+/* CARRITO */
+function addToCart(id) {
+  state.cart.set(id, (state.cart.get(id) || 0) + 1);
+  renderCart();
+
+  const product = productsData.find(p => p.id === id);
+  showToast(`${product.name} añadido al carrito`);
+}
+
+function renderCart() {
+  let count = 0;
+  let subtotal = 0;
+
+  state.cart.forEach((quantity, id) => {
+    const product = productsData.find(p => p.id === id);
+    count += quantity;
+    subtotal += product.price * quantity;
+  });
+
+  $("cartCount").textContent = count;
+  $("subtotal").textContent = money(subtotal);
+
+  if (state.cart.size === 0) {
+    $("cartItems").innerHTML =
+      '<p style="padding:25px 0;color:#85889b">Tu carrito está vacío.</p>';
+    return;
+  }
+
+  $("cartItems").innerHTML = [...state.cart.entries()]
+    .map(([id, quantity]) => {
+      const product = productsData.find(p => p.id === id);
+
+      return `
+        <div class="cart-item">
+          <img
+            src="${product.image}"
+            alt="${product.name}"
+            onerror="handleImageError(this, ${product.id})">
+
+          <div>
+            <strong>${product.name}</strong>
+            <p>${money(product.price * quantity)}</p>
+
+            <button data-minus="${id}">−</button>
+            <span>${quantity}</span>
+            <button data-plus="${id}">+</button>
+            <button data-remove="${id}">Eliminar</button>
+          </div>
+        </div>`;
+    }).join("");
+}
+
+$("products").addEventListener("click", event => {
+  const button = event.target.closest("[data-add]");
+  if (!button) return;
+
+  addToCart(Number(button.dataset.add));
+
+  button.classList.add("added");
+  button.textContent = "✓ ¡Añadido!";
+
+  setTimeout(() => {
+    if (!button.isConnected) return;
+    button.classList.remove("added");
+    button.textContent = "🛒 Añadir al carrito";
+  }, 1000);
+});
+
+$("cartItems").addEventListener("click", event => {
+  const minus = event.target.closest("[data-minus]");
+  const plus = event.target.closest("[data-plus]");
+  const remove = event.target.closest("[data-remove]");
+
+  if (minus) {
+    const id = Number(minus.dataset.minus);
+    const quantity = state.cart.get(id) - 1;
+
+    if (quantity <= 0) state.cart.delete(id);
+    else state.cart.set(id, quantity);
+  }
+
+  if (plus) {
+    const id = Number(plus.dataset.plus);
+    state.cart.set(id, state.cart.get(id) + 1);
+  }
+
+  if (remove) {
+    state.cart.delete(Number(remove.dataset.remove));
+  }
+
+  renderCart();
+});
+
+/* ABRIR Y CERRAR CARRITO */
+function openCart() {
+  $("cartPanel").classList.add("open");
+  $("overlay").classList.add("open");
+}
+
+function closeCart() {
+  $("cartPanel").classList.remove("open");
+  $("overlay").classList.remove("open");
+}
+
+$("openCart").addEventListener("click", openCart);
+$("closeCart").addEventListener("click", closeCart);
+$("overlay").addEventListener("click", closeCart);
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape") closeCart();
+});
+
+$("checkout").addEventListener("click", () => {
+  if (state.cart.size === 0) {
+    showToast("Añade productos antes de continuar");
+  } else {
+    showToast("Demo: todavía no hay pagos reales configurados");
+  }
+});
+
+/* INICIALIZACIÓN */
+renderProducts();
+renderCart();
+</script>
+
+</body>
+</html>

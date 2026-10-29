@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perú Mágico - Destinos Turísticos</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          },
+          colors: {
+            peru: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              500: '#e11d48',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+            },
+            gold: {
+              400: '#fbbf24',
+              500: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Efectos de perspección y animación */
+    .perspective-container {
+      perspective: 1200px;
+    }
+
+    .tour-card {
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.5s ease;
+      will-change: transform;
+    }
+
+    /* Transformación y Parallax en Hover */
+    .tour-card-inner {
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tour-card:hover .card-bg-img {
+      transform: scale(1.12) translateZ(20px);
+    }
+
+    .tour-card:hover .card-content {
+      transform: translateZ(40px);
+    }
+
+    .tour-card:hover .card-badge {
+      transform: translateZ(50px) scale(1.05);
+    }
+
+    .tour-card:hover .card-action-btn {
+      transform: translateZ(60px);
+    }
+
+    /* Keyframes de entrada para tarjetas */
+    @keyframes fadeInUp3D {
+      0% {
+        opacity: 0;
+        transform: translateY(40px) rotateX(-15deg) scale(0.95);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg) scale(1);
+      }
+    }
+
+    .animate-card-entry {
+      animation: fadeInUp3D 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Animación de pulso de corazón */
+    @keyframes heartPop {
+      0% { transform: scale(1) translateZ(50px); }
+      50% { transform: scale(1.4) translateZ(70px); }
+      100% { transform: scale(1) translateZ(50px); }
+    }
+
+    .animate-heart-pop {
+      animation: heartPop 0.35s ease-out;
+    }
+
+    /* Ocultar barra de desplazamiento */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-peru-600 selection:text-white">
+
+  <!-- HERO & NAVBAR -->
+  <header class="relative border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-peru-700 via-peru-600 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-peru-600/30 group-hover:scale-105 transition-transform duration-300">
+          <i class="fa-solid fa-mountain-sun text-xl"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-extrabold tracking-tight font-serif bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">Perú Mágico</span>
+          <span class="block text-[10px] font-bold uppercase tracking-widest text-peru-500 -mt-1">Descubre lo Extraordinario</span>
+        </div>
+      </a>
+
+      <!-- Buscador -->
+      <div class="hidden md:flex flex-1 max-w-md mx-8 relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="Buscar destino (ej. Cusco, Arequipa, Selva)..." 
+          class="w-full pl-11 pr-4 py-2.5 bg-slate-800/60 border border-slate-700/60 rounded-full text-sm font-medium text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-peru-500 focus:ring-2 focus:ring-peru-500/20 transition-all"
+        >
+      </div>
+
+      <!-- Favoritos e Itinerario -->
+      <div class="flex items-center gap-3">
+        <button 
+          id="favoritesToggleBtn"
+          class="relative p-3 rounded-full bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 transition-colors flex items-center justify-center border border-slate-700/50"
+          aria-label="Mis Favoritos"
+          title="Ver Favoritos"
+        >
+          <i class="fa-solid fa-heart text-lg text-peru-500"></i>
+          <span 
+            id="favBadge" 
+            class="absolute -top-1 -right-1 bg-peru-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-md scale-0 transition-transform duration-300"
+          >0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Buscador Móvil -->
+    <div class="md:hidden px-4 pb-4">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input 
+          type="text" 
+          id="searchMobileInput" 
+          placeholder="Buscar destinos turísticos..." 
+          class="w-full pl-11 pr-4 py-2 bg-slate-800/80 border border-slate-700 rounded-full text-sm text-slate-200 focus:outline-none focus:border-peru-500"
+        >
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    
+    <!-- Header de Galería -->
+    <section class="mb-10 text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-peru-500/10 border border-peru-500/20 text-peru-400 text-xs font-bold uppercase tracking-widest mb-3">
+          <i class="fa-solid fa-compass"></i> Explorador Interactivo 3D
+        </div>
+        <h1 class="text-3xl sm:text-5xl font-extrabold font-serif tracking-tight text-white">
+          Destinos Turísticos del Perú
+        </h1>
+        <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-2xl">
+          Pasa el cursor o interactúa con las tarjetas para experimentar las transformaciones visuales 3D y descubrir maravillas naturales, históricas y culturales.
+        </p>
+      </div>
+
+      <!-- Filtros de Región -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar self-center md:self-end" id="regionFilters">
+        <!-- Renderizado dinámico -->
+      </div>
+    </section>
+
+    <!-- GALERÍA GRID 3D -->
+    <section 
+      id="destinationsGrid" 
+      class="perspective-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8 sm:gap-10"
+    >
+      <!-- Tarjetas insertadas por JS -->
+    </section>
+
+    <!-- Estado de Búsqueda Vacía -->
+    <div id="emptyState" class="hidden text-center py-20 px-4">
+      <div class="w-20 h-20 bg-slate-800/80 text-slate-500 rounded-3xl flex items-center justify-center mx-auto mb-4 text-3xl border border-slate-700">
+        <i class="fa-solid fa-map-location-dot"></i>
+      </div>
+      <h3 class="text-xl font-bold text-white font-serif">No se encontraron destinos</h3>
+      <p class="text-slate-400 text-sm mt-1 max-w-md mx-auto">Intenta buscar con otro término o selecciona una región diferente.</p>
+      <button id="resetFiltersBtn" class="mt-5 px-6 py-2.5 bg-peru-600 hover:bg-peru-700 text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-peru-600/30">
+        Ver todos los destinos
+      </button>
+    </div>
+
+  </main>
+
+  <!-- MODAL DETALLES DEL DESTINO -->
+  <div id="modalOverlay" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 opacity-0 pointer-events-none transition-opacity duration-300 flex items-center justify-center p-4">
+    <div id="modalCard" class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl transform scale-90 opacity-0 transition-all duration-300 flex flex-col md:flex-row">
+      <!-- Imagen Modal -->
+      <div class="md:w-1/2 relative h-64 md:h-auto overflow-hidden">
+        <img id="modalImage" src="" alt="" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:hidden"></div>
+      </div>
+      <!-- Info Modal -->
+      <div class="md:w-1/2 p-6 flex flex-col justify-between">
+        <div>
+          <div class="flex justify-between items-start mb-2">
+            <span id="modalRegion" class="text-xs font-bold text-peru-400 uppercase tracking-widest bg-peru-500/10 px-2.5 py-1 rounded-lg border border-peru-500/20"></span>
+            <button id="closeModalBtn" class="text-slate-400 hover:text-white text-xl p-1">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <h2 id="modalTitle" class="text-2xl font-bold font-serif text-white mt-1"></h2>
+          <p id="modalLocation" class="text-xs text-slate-400 mt-1 flex items-center gap-1">
+            <i class="fa-solid fa-location-dot text-peru-500"></i> <span></span>
+          </p>
+          <p id="modalDescription" class="text-slate-300 text-sm mt-4 leading-relaxed"></p>
+          
+          <div class="mt-4 pt-4 border-t border-slate-800 grid grid-cols-2 gap-3 text-xs">
+            <div class="bg-slate-800/50 p-2.5 rounded-xl border border-slate-700/50">
+              <span class="text-slate-400 block">Mejor Época:</span>
+              <span id="modalSeason" class="font-bold text-slate-200"></span>
+            </div>
+            <div class="bg-slate-800/50 p-2.5 rounded-xl border border-slate-700/50">
+              <span class="text-slate-400 block">Altitud:</span>
+              <span id="modalAltitude" class="font-bold text-slate-200"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] text-slate-400 block">Precio estimado</span>
+            <span id="modalPrice" class="text-xl font-extrabold text-amber-400"></span>
+          </div>
+          <button id="modalBookBtn" class="px-5 py-2.5 bg-peru-600 hover:bg-peru-700 text-white font-bold text-xs rounded-xl shadow-lg shadow-peru-600/30 transition-all active:scale-95">
+            Planificar Viaje
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICACIÓN TOAST -->
+  <div 
+    id="toast" 
+    class="fixed bottom-6 right-6 bg-slate-900 border border-slate-800 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none"
+  >
+    <div class="w-8 h-8 rounded-xl bg-peru-500/20 text-peru-400 flex items-center justify-center flex-shrink-0">
+      <i class="fa-solid fa-heart text-sm"></i>
+    </div>
+    <p id="toastMessage" class="text-xs sm:text-sm font-semibold text-slate-200"></p>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // --- GENERADOR DE SVG FALLBACK ---
+    function getFallbackSvg(title, region) {
+      const regionColors = {
+        'Sierra': '#b91c1c',
+        'Costa': '#d97706',
+        'Selva': '#15803d'
+      };
+      const bg = regionColors[region] || '#475569';
+      
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+        <defs>
+          <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${bg}" stop-opacity="0.8"/>
+            <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#g)"/>
+        <circle cx="300" cy="350" r="160" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="4"/>
+        <path d="M 220 420 L 300 280 L 380 420 Z" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="8" stroke-linejoin="round"/>
+        <path d="M 270 420 L 320 330 L 370 420 Z" fill="none" stroke="#ffffff" stroke-opacity="0.15" stroke-width="6" stroke-linejoin="round"/>
+        <text x="50%" y="540" font-family="serif" font-size="32" font-weight="800" fill="#ffffff" text-anchor="middle">${title}</text>
+        <text x="50%" y="580" font-family="sans-serif" font-size="16" font-weight="700" fill="#f59e0b" letter-spacing="3" text-anchor="middle">${region.toUpperCase()} • PERÚ</text>
+      </svg>`;
+      
+      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    }
+
+    // --- BASE DE DATOS DE DESTINOS TURÍSTICOS DEL PERÚ ---
+    const DESTINATIONS = [
+      {
+        id: 1,
+        title: "Machu Picchu",
+        region: "Sierra",
+        location: "Cusco, Perú",
+        price: "S/ 320",
+        rating: 5.0,
+        reviewsCount: 3420,
+        badge: "Maravilla del Mundo",
+        image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Machu_Picchu%2C_Peru_%282018%29.jpg/1280px-Machu_Picchu%2C_Peru_%282018%29.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=thumbnail",
+        description: "La santuario histórico inca construido en la cima de las montañas de los Andes. Rodeado de bosques de neblina e imponentes paisajes de historia viva.",
+        season: "Mayo - Octubre",
+        altitude: "2,430 msnm",
+        isFavorite: false
+      },
+      {
+        id: 2,
+        title: "Líneas de Nazca",
+        region: "Costa",
+        location: "Ica, Perú",
+        price: "S/ 280",
+        rating: 4.8,
+        reviewsCount: 1890,
+        badge: "Patrimonio UNESCO",
+        image: "https://cdn.sanity.io/images/mkg24y51/production/159168b08d4099abcb308692d4cbb1f255f263ff-1000x725.webp/visitar-lineas-nazca-1.webp?w=1536&auto=format",
+        description: "Enigmáticos geoglifos trazados en las pampas de Jumana que representan figuras geométricas, animales y plantas visibles desde el aire.",
+        season: "Todo el año",
+        altitude: "520 msnm",
+        isFavorite: false
+      },
+      {
+        id: 3,
+        title: "Reserva Nacional Pacaya Samiria",
+        region: "Selva",
+        location: "Loreto, Perú",
+        price: "S/ 450",
+        rating: 4.9,
+        reviewsCount: 940,
+        badge: "Biodiversidad Pura",
+image: "https://upload.wikimedia.org/wikipedia/commons/4/49/Aldea_del_Mara%C3%B1on_-_panoramio.jpg?utm_source=es.wikipedia.org&utm_campaign=index&utm_content=original",
+        description: "Conocida como la 'Selva de los Espejos', es una de las reservas protegidas más grandes de la Amazonía peruana, hogar del delfín rosado.",
+        season: "Junio - Noviembre",
+        altitude: "106 msnm",
+        isFavorite: false
+      },
+      {
+        id: 4,
+        title: "Cañón del Colca",
+        region: "Sierra",
+        location: "Arequipa, Perú",
+        price: "S/ 190",
+        rating: 4.7,
+        reviewsCount: 2150,
+        badge: "Vuelo del Cóndor",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKdTH2n0M3J8MkRVNR5ox5kRJZQt7Pre8cCb2-2gWly0ohLcRRFyyI7aQs&s=10",
+        description: "Uno de los cañones más profundos del planeta. Ofrece impresionantes avistamientos del majestuoso cóndor andino y andenerías preincas.",
+        season: "Abril - Noviembre",
+        altitude: "3,635 msnm",
+        isFavorite: false
+      },
+      {
+        id: 5,
+        title: "Oasis de la Huacachina",
+        region: "Costa",
+        location: "Ica, Perú",
+        price: "S/ 110",
+        rating: 4.8,
+        reviewsCount: 2800,
+        badge: "Aventura en Dunas",
+        image: "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sq_4678QjDkid7vbkDb5Qlhgg8STYS6fMMuOQl96zBfc1OYW191YF2gRaQjhJBUt3sNjW42Y71DNFlT5Gn1GxBzuoL7wa3EwDj6EqjYf9fg6D5xsxRHvl_rQAKkHZqdZw6UeJZ9w=s1360-w1360-h1020-rw",
+        description: "Un oasis natural rodeado de inmensas dunas de arena dorada. Ideal para el sandboard, paseos en tubulares y atardeceres memorables.",
+        season: "Todo el año",
+        altitude: "406 msnm",
+        isFavorite: true
+      },
+      {
+        id: 6,
+        title: "Montaña de 7 Colores (Vinicunca)",
+        region: "Sierra",
+        location: "Cusco, Perú",
+        price: "S/ 140",
+        rating: 4.9,
+        reviewsCount: 3100,
+        badge: "Fenómeno Natural",
+        image: "https://lh3.googleusercontent.com/gps-cs-s/ANWiy9Sq_4678QjDkid7vbkDb5Qlhgg8STYS6fMMuOQl96zBfc1OYW191YF2gRaQjhJBUt3sNjW42Y71DNFlT5Gn1GxBzuoL7wa3EwDj6EqjYf9fg6D5xsxRHvl_rQAKkHZqdZw6UeJZ9w=s1360-w1360-h1020-rw",
+        description: "Montaña con una impresionante coloración provocada por la composición de minerales marinos, lacustres y fluviales acumulados hace millones de años.",
+        season: "Mayo - Septiembre",
+        altitude: "5,200 msnm",
+        isFavorite: false
+      }
+    ];
+
+    const REGIONS = ["Todos", "Sierra", "Costa", "Selva"];
+
+    // --- ESTADO ---
+    let currentRegion = "Todos";
+    let searchQuery = "";
+    let showOnlyFavorites = false;
+    let favorites = new Set([5]); // Inicializado con el id 5
+
+    // --- ELEMENTOS DOM ---
+    const destinationsGrid = document.getElementById("destinationsGrid");
+    const regionFilters = document.getElementById("regionFilters");
+    const searchInput = document.getElementById("searchInput");
+    const searchMobileInput = document.getElementById("searchMobileInput");
+    const emptyState = document.getElementById("emptyState");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const favBadge = document.getElementById("favBadge");
+    const favoritesToggleBtn = document.getElementById("favoritesToggleBtn");
+
+    // Modal
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalCard = document.getElementById("modalCard");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    const modalImage = document.getElementById("modalImage");
+    const modalRegion = document.getElementById("modalRegion");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalLocation = document.getElementById("modalLocation");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalSeason = document.getElementById("modalSeason");
+    const modalAltitude = document.getElementById("modalAltitude");
+    const modalPrice = document.getElementById("modalPrice");
+    const modalBookBtn = document.getElementById("modalBookBtn");
+
+    // Toast
+    const toast = document.getElementById("toast");
+    const toastMessage = document.getElementById("toastMessage");
+
+    // --- INICIALIZACIÓN ---
+    window.addEventListener("DOMContentLoaded", () => {
+      renderRegionFilters();
+      renderDestinations();
+      updateFavBadge();
+      setupEventListeners();
+    });
+
+    // --- EVENT LISTENERS ---
+    function setupEventListeners() {
+      // Búsqueda
+      searchInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        searchMobileInput.value = e.target.value;
+        renderDestinations();
+      });
+
+      searchMobileInput.addEventListener("input", (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        searchInput.value = e.target.value;
+        renderDestinations();
+      });
+
+      resetFiltersBtn.addEventListener("click", () => {
+        currentRegion = "Todos";
+        searchQuery = "";
+        showOnlyFavorites = false;
+        searchInput.value = "";
+        searchMobileInput.value = "";
+        favoritesToggleBtn.classList.remove("bg-peru-600", "text-white");
+        favoritesToggleBtn.classList.add("bg-slate-800/80", "text-slate-300");
+        renderRegionFilters();
+        renderDestinations();
+      });
+
+      // Toggle ver favoritos
+      favoritesToggleBtn.addEventListener("click", () => {
+        showOnlyFavorites = !showOnlyFavorites;
+        if(showOnlyFavorites) {
+          favoritesToggleBtn.classList.add("bg-peru-600", "text-white");
+          favoritesToggleBtn.classList.remove("bg-slate-800/80", "text-slate-300");
+          showToast("Mostrando solo destinos favoritos");
+        } else {
+          favoritesToggleBtn.classList.remove("bg-peru-600", "text-white");
+          favoritesToggleBtn.classList.add("bg-slate-800/80", "text-slate-300");
+        }
+        renderDestinations();
+      });
+
+      // Modal Actions
+      closeModalBtn.addEventListener("click", closeModal);
+      modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) closeModal();
+      });
+
+      modalBookBtn.addEventListener("click", () => {
+        showToast("¡Solicitud enviada! Un asesor te contactará.");
+        closeModal();
+      });
+    }
+
+    // --- FILTROS DE REGIÓN ---
+    function renderRegionFilters() {
+      regionFilters.innerHTML = REGIONS.map(reg => {
+        const isActive = reg === currentRegion && !showOnlyFavorites;
+        return `
+          <button 
+            onclick="setRegion('${reg}')"
+            class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-300 ${
+              isActive 
+                ? 'bg-peru-600 text-white shadow-lg shadow-peru-600/30' 
+                : 'bg-slate-800/80 border border-slate-700/60 text-slate-300 hover:bg-slate-700/80 hover:text-white'
+            }"
+          >
+            ${reg === 'Todos' ? 'Todas las Regiones' : reg}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function setRegion(region) {
+      currentRegion = region;
+      showOnlyFavorites = false;
+      favoritesToggleBtn.classList.remove("bg-peru-600", "text-white");
+      favoritesToggleBtn.classList.add("bg-slate-800/80", "text-slate-300");
+      renderRegionFilters();
+      renderDestinations();
+    }
+
+    // --- RENDERIZAR ESTRELLAS ---
+    function renderStars(rating) {
+      const fullStars = Math.floor(rating);
+      let stars = "";
+      for (let i = 0; i < 5; i++) {
+        if (i < fullStars) {
+          stars += `<i class="fa-solid fa-star text-gold-400 text-xs"></i>`;
+        } else {
+          stars += `<i class="fa-solid fa-star-half-stroke text-gold-400 text-xs"></i>`;
+        }
+      }
+      return stars;
+    }
+
+    // --- RENDERIZAR GALERÍA CON EFECTOS PARALLAX 3D ---
+    function renderDestinations() {
+      const filtered = DESTINATIONS.filter(item => {
+        const matchesRegion = currentRegion === "Todos" || item.region === currentRegion;
+        const matchesSearch = item.title.toLowerCase().includes(searchQuery) || 
+                              item.location.toLowerCase().includes(searchQuery) ||
+                              item.region.toLowerCase().includes(searchQuery);
+        const matchesFav = !showOnlyFavorites || favorites.has(item.id);
+
+        return matchesRegion && matchesSearch && matchesFav;
+      });
+
+      if (filtered.length === 0) {
+        destinationsGrid.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+
+      destinationsGrid.innerHTML = filtered.map((item, index) => {
+        const isFav = favorites.has(item.id);
+        const fallbackImg = getFallbackSvg(item.title, item.region);
+
+        return `
+          <div 
+            class="tour-card group relative bg-slate-900 border border-slate-800/80 rounded-3xl overflow-hidden shadow-xl cursor-pointer opacity-0 animate-card-entry"
+            style="animation-delay: ${index * 80}ms;"
+            onmousemove="handleTilt(event, this)"
+            onmouseleave="resetTilt(this)"
+            onclick="openModal(${item.id})"
+          >
+            <!-- Contenedor de Imagen Parallax -->
+            <div class="relative h-96 w-full overflow-hidden">
+              <img 
+                src="${item.image}" 
+                alt="${item.title}" 
+                class="card-bg-img w-full h-full object-cover transition-transform duration-700 ease-out"
+                onerror="this.onerror=null; this.src='${fallbackImg}';"
+              />
+              
+              <!-- Gradiente de superposición para legibilidad -->
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+
+              <!-- Badge Superior (Región / Destacado) -->
+              <div class="card-badge absolute top-4 left-4 z-10 flex items-center gap-2 transition-transform duration-500">
+                <span class="bg-slate-950/70 backdrop-blur-md text-slate-200 border border-slate-700/60 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                  ${item.region}
+                </span>
+                ${item.badge ? `
+                  <span class="bg-peru-600/90 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-lg shadow-peru-600/30">
+                    ${item.badge}
+                  </span>
+                ` : ''}
+              </div>
+
+              <!-- Botón Favoritos -->
+              <button 
+                onclick="toggleFavorite(event, ${item.id}, this)"
+                class="card-action-btn absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-slate-950/60 backdrop-blur-md border border-slate-700/60 flex items-center justify-center text-slate-300 hover:text-peru-500 transition-all duration-300 hover:scale-110 active:scale-90"
+                aria-label="Guardar favorito"
+              >
+                <i class="${isFav ? 'fa-solid fa-heart text-peru-500' : 'fa-regular fa-heart'} text-base"></i>
+              </button>
+
+              <!-- Contenido Textual sobre la tarjeta 3D -->
+              <div class="card-content absolute bottom-0 inset-x-0 p-6 flex flex-col justify-end z-10 transition-transform duration-500">
+                <p class="text-xs font-semibold text-amber-400 flex items-center gap-1.5 mb-1">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>${item.location}</span>
+                </p>
+
+                <h3 class="text-2xl font-bold font-serif text-white tracking-tight group-hover:text-peru-400 transition-colors">
+                  ${item.title}
+                </h3>
+
+                <!-- Puntuación -->
+                <div class="flex items-center gap-2 mt-2">
+                  <div class="flex items-center gap-1">
+                    ${renderStars(item.rating)}
+                  </div>
+                  <span class="text-xs font-bold text-slate-200">${item.rating}</span>
+                  <span class="text-[11px] text-slate-400">(${item.reviewsCount} opiniones)</span>
+                </div>
+
+                <!-- Detalles de Precio y Acción -->
+                <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                  <div>
+                    <span class="text-[10px] uppercase tracking-wider text-slate-400 block">Desde</span>
+                    <span class="text-lg font-extrabold text-amber-400">${item.price}</span>
+                  </div>
+
+                  <span class="inline-flex items-center gap-2 text-xs font-bold text-white bg-slate-800/80 hover:bg-peru-600 border border-slate-700/80 hover:border-peru-500 px-4 py-2 rounded-xl transition-all duration-300 group-hover:shadow-lg group-hover:shadow-peru-600/30">
+                    <span>Explorar</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- TILT EFFECT 3D EN MOUSEMOVE ---
+    function handleTilt(e, card) {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      // Calcular grados de rotación
+      const rotateX = ((y - centerY) / centerY) * -12; // Máximo 12deg
+      const rotateY = ((x - centerX) / centerX) * 12;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+    }
+
+    function resetTilt(card) {
+      card.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)`;
+    }
+
+    // --- ACCIÓN FAVORITOS ---
+    function toggleFavorite(e, id, button) {
+      e.stopPropagation(); // Evitar abrir el modal
+      
+      const icon = button.querySelector("i");
+      button.classList.add("animate-heart-pop");
+
+      if (favorites.has(id)) {
+        favorites.delete(id);
+        icon.className = "fa-regular fa-heart text-base";
+        showToast("Eliminado de favoritos");
+      } else {
+        favorites.add(id);
+        icon.className = "fa-solid fa-heart text-peru-500 text-base";
+        showToast("¡Añadido a tus favoritos!");
+      }
+
+      setTimeout(() => button.classList.remove("animate-heart-pop"), 350);
+      updateFavBadge();
+
+      if (showOnlyFavorites) {
+        renderDestinations();
+      }
+    }
+
+    function updateFavBadge() {
+      favBadge.textContent = favorites.size;
+      if (favorites.size > 0) {
+        favBadge.classList.remove("scale-0");
+        favBadge.classList.add("scale-100");
+      } else {
+        favBadge.classList.remove("scale-100");
+        favBadge.classList.add("scale-0");
+      }
+    }
+
+    // --- MODAL DETALLES ---
+    function openModal(id) {
+      const item = DESTINATIONS.find(d => d.id === id);
+      if (!item) return;
+
+      const fallbackImg = getFallbackSvg(item.title, item.region);
+
+      modalImage.src = item.image;
+      modalImage.onerror = () => { modalImage.src = fallbackImg; };
+      modalRegion.textContent = item.region;
+      modalTitle.textContent = item.title;
+      modalLocation.querySelector("span").textContent = item.location;
+      modalDescription.textContent = item.description;
+      modalSeason.textContent = item.season;
+      modalAltitude.textContent = item.altitude;
+      modalPrice.textContent = item.price;
+
+      modalOverlay.classList.remove("opacity-0", "pointer-events-none");
+      modalOverlay.classList.add("opacity-100");
+
+      setTimeout(() => {
+        modalCard.classList.remove("scale-90", "opacity-0");
+        modalCard.classList.add("scale-100", "opacity-100");
+      }, 50);
+    }
+
+    function closeModal() {
+      modalCard.classList.remove("scale-100", "opacity-100");
+      modalCard.classList.add("scale-90", "opacity-0");
+
+      setTimeout(() => {
+        modalOverlay.classList.remove("opacity-100");
+        modalOverlay.classList.add("opacity-0", "pointer-events-none");
+      }, 250);
+    }
+
+    // --- NOTIFICACIÓN TOAST ---
+    let toastTimeout;
+    function showToast(message) {
+      toastMessage.textContent = message;
+      toast.classList.remove("translate-y-20", "opacity-0", "pointer-events-none");
+      toast.classList.add("translate-y-0", "opacity-100");
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("translate-y-0", "opacity-100");
+        toast.classList.add("translate-y-20", "opacity-0", "pointer-events-none");
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
